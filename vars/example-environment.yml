@@ -1,0 +1,16 @@
+---
+# set these parameters to control the region, keypair, and AMI that are launched
+ec2_region: us-east-1
+instances_keypair: keypair-name
+image_id: ami-bf5021d6
+
+# security groups to be created
+security_groups:
+  - name: ssh
+    desc: the security group for the jumphost
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+

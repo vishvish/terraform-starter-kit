@@ -1,0 +1,21 @@
+# Ansible should run this after all the infrastructure is destroyed by Terraform.
+# It should clean up all resources not managed by Terraform, such as the S3 state
+# bucket and any others created in the 000_bootstrap.yml playbook. i.e. it should
+# reverse everything from that playbook.
+
+---
+- name: Teardown initial resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars_files:
+    - vars/example-environment.yml
+
+  tasks:
+  - name: Delete root S3 state bucket
+    s3_bucket:
+      name: "{{ lookup('env', 'STATE_BUCKET') }}"
+      state: absent
+      force: yes
+

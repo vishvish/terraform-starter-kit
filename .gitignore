@@ -1,0 +1,6 @@
+/.envrc
+.terraform
+*.retry
+ansible-vault-password.txt
+.DS_Store
+terraform.tfstate.backup

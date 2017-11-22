@@ -1,0 +1,28 @@
+# Ansible should run this playbook before any infrastructure is created.
+
+# The first task is to ensure that the S3 bucket for future Terraform state is
+# present. You may also use this file for any other preliminary tasks.
+
+---
+- name: Create initial resources
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars_files:
+    - vars/example-environment.yml
+
+  tasks:
+  - name: Create root S3 state bucket
+    s3_bucket:
+      name: "{{ lookup('env', 'STATE_BUCKET') }}"
+      versioning: no
+      tags:
+        name: "{{ lookup('env', 'AVENGERS_PROJECT') }} Root State Bucket"
+        owner: "{{ lookup('env', 'AVENGERS_OWNER') }}"
+        email: "{{ lookup('env', 'AVENGERS_EMAIL') }}"
+        costcentre: "{{ lookup('env', 'AVENGERS_COSTCENTRE') }}"
+        project: "{{ lookup('env', 'AVENGERS_PROJECT') }}"
+        live: "{{ lookup('env', 'AVENGERS_LIVE') }}"
+        technical_contact: "{{ lookup('env', 'AVENGERS_TECHNICAL_CONTACT') }}"
+
