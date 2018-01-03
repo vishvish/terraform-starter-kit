@@ -1,13 +1,15 @@
 export AWS_ACCOUNT_NUMBER=XXXXXXXXXXXX
 export KOPS_STATE_STORE=s3://platform-k8s-blah
-export AWS_ROLE=blahblah_admin
+export AWS_ROLE=AdminRole
+export AWS_REGION=us-east-1
+export STATE_BUCKET=XXXXXXXXXXXX
+export DYNAMO_BACKEND_TABLE=XXXXXXXXXXXXX
 export PLATFORM_K8S_NAME=k8s.example.com
 export PLATFORM_ZONES="eu-west-1a,eu-west-1b,eu-west-1c"
 export PLATFORM_PUBLIC_KEY=~/.ssh/id_rsa.pub
 export PLATFORM_OWNER="owner@example.com"
 export PLATFORM_EMAIL="owner@example.com"
+export PLATFORM_COSTCENTRE="example-costcentre"
 export PLATFORM_TECHNICAL_CONTACT=tech@example.com
 export PLATFORM_PROJECT=platform
 export PLATFORM_LIVE=no
-
-

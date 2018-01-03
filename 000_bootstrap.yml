@@ -18,11 +18,23 @@
       name: "{{ lookup('env', 'STATE_BUCKET') }}"
       versioning: no
       tags:
-        name: "{{ lookup('env', 'AVENGERS_PROJECT') }} Root State Bucket"
-        owner: "{{ lookup('env', 'AVENGERS_OWNER') }}"
-        email: "{{ lookup('env', 'AVENGERS_EMAIL') }}"
-        costcentre: "{{ lookup('env', 'AVENGERS_COSTCENTRE') }}"
-        project: "{{ lookup('env', 'AVENGERS_PROJECT') }}"
-        live: "{{ lookup('env', 'AVENGERS_LIVE') }}"
-        technical_contact: "{{ lookup('env', 'AVENGERS_TECHNICAL_CONTACT') }}"
+        description:        "{{ lookup('env', 'PLATFORM_PROJECT') }} TF Root State Bucket"
+        owner:              "{{ lookup('env', 'PLATFORM_OWNER') }}"
+        email:              "{{ lookup('env', 'PLATFORM_EMAIL') }}"
+        costcentre:         "{{ lookup('env', 'PLATFORM_COSTCENTRE') }}"
+        project:            "{{ lookup('env', 'PLATFORM_PROJECT') }}"
+        live:               "{{ lookup('env', 'PLATFORM_LIVE') }}"
+        technical_contact:  "{{ lookup('env', 'PLATFORM_TECHNICAL_CONTACT') }}"
 
+  - name: Create DynamoDB table for remote state locking
+    dynamodb_table:
+      name: "{{ lookup('env', 'DYNAMO_BACKEND_TABLE') }}"
+      hash_key_name: "LockID"
+      tags:
+        description:        "{{ lookup('env', 'PLATFORM_PROJECT') }} Terraform lock state table"
+        owner:              "{{ lookup('env', 'PLATFORM_OWNER') }}"
+        email:              "{{ lookup('env', 'PLATFORM_EMAIL') }}"
+        costcentre:         "{{ lookup('env', 'PLATFORM_COSTCENTRE') }}"
+        project:            "{{ lookup('env', 'PLATFORM_PROJECT') }}"
+        live:               "{{ lookup('env', 'PLATFORM_LIVE') }}"
+        technical_contact:  "{{ lookup('env', 'PLATFORM_TECHNICAL_CONTACT') }}"
