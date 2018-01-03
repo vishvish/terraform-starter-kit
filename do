@@ -24,16 +24,18 @@ SID="$(date +%s)"
 
 
 #------------------------------------------------------------------------------
-#    __  ___________ _____ ____ 
+#    __  ___________ _____ ____
 #   / / / / ___/ __ `/ __ `/ _ \
 #  / /_/ (__  ) /_/ / /_/ /  __/
-#  \__,_/____/\__,_/\__, /\___/ 
-#                  /____/       
-#  
+#  \__,_/____/\__,_/\__, /\___/
+#                  /____/
+#
 usage(){
-  echo "Usage: $0 <plan|apply|destroy>"
+  echo "Usage: $0 <bootstrap|plan|apply|destroy|teardown>"
   echo
   echo "do - Run interactively"
+  echo "do bootstrap - Set up your S3 state bucket"
+  echo "do teardown - Destroy the S3 state bucket"
   echo "do plan -e <env_file> -l <layer> - Terraform plan AWS infrastructure"
   echo "do apply -e <env_file> -l <layer> - Terraform apply"
   echo "do destroy -e <env_file> -l <layer> - Terraform destroy"
@@ -41,7 +43,7 @@ usage(){
   1>&2
   exit 1
 }
-# [[ -z $1 ]] && interactive
+
 [[ $1 == "-h" ]] && usage
 
 ## Send output to syslog, but only after usage prints out
@@ -49,12 +51,12 @@ exec >& >(exec logger -s -t "$(basename $0) ${SID}") 2>&1
 
 
 #------------------------------------------------------------------------------
-#                                                        __   
-#    ____ _____________  ______ ___  ___     _________  / /__ 
+#                                                        __
+#    ____ _____________  ______ ___  ___     _________  / /__
 #   / __ `/ ___/ ___/ / / / __ `__ \/ _ \   / ___/ __ \/ / _ \
 #  / /_/ (__  |__  ) /_/ / / / / / /  __/  / /  / /_/ / /  __/
-#  \__,_/____/____/\__,_/_/ /_/ /_/\___/  /_/   \____/_/\___/ 
-#                                                             
+#  \__,_/____/____/\__,_/_/ /_/ /_/\___/  /_/   \____/_/\___/
+#
 # Setup assume role tings
 unset AWS_SESSION_TOKEN
 
@@ -63,19 +65,29 @@ temp_role=$(aws sts assume-role \
   --role-session-name "${SID}" \
   --duration-seconds 3600)
 
+# Check everything is OK and print any error string
+echo $temp_role
+
+
 export AWS_ACCESS_KEY_ID=$(echo $temp_role | jq .Credentials.AccessKeyId | xargs)
 export AWS_SECRET_ACCESS_KEY=$(echo $temp_role | jq .Credentials.SecretAccessKey | xargs)
 export AWS_SESSION_TOKEN=$(echo $temp_role | jq .Credentials.SessionToken | xargs)
 
+if  [ -z "$AWS_ACCESS_KEY_ID"  -o  -z "$AWS_SECRET_ACCESS_KEY" -o -z  "$AWS_SESSION_TOKEN" ] ; then
+  echo "Unable to assume temporary role named '${SID}' using '${AWS_ACCOUNT_NUMBER}:role/${AWS_ROLE}'."
+  echo "Have you set up your environment correctly?"
+  exit 1
+fi
+
 
 #------------------------------------------------------------------------------
-#                                  __                    _____            
+#                                  __                    _____
 #    ___  ______________  _____   / /_  ____ _____  ____/ / (_)___  ____ _
 #   / _ \/ ___/ ___/ __ \/ ___/  / __ \/ __ `/ __ \/ __  / / / __ \/ __ `/
-#  /  __/ /  / /  / /_/ / /     / / / / /_/ / / / / /_/ / / / / / / /_/ / 
-#  \___/_/  /_/   \____/_/     /_/ /_/\__,_/_/ /_/\__,_/_/_/_/ /_/\__, /  
-#                                                                /____/   
-# 
+#  /  __/ /  / /  / /_/ / /     / / / / /_/ / / / / /_/ / / / / / / /_/ /
+#  \___/_/  /_/   \____/_/     /_/ /_/\__,_/_/ /_/\__,_/_/_/_/ /_/\__, /
+#                                                                /____/
+#
 declare -A LISTENERS
 
 # run functions (listeners) for events
@@ -102,13 +114,13 @@ addListener EXIT onExit
 
 
 #------------------------------------------------------------------------------
-#            __          
-#     ____  / /___ _____ 
+#            __
+#     ____  / /___ _____
 #    / __ \/ / __ `/ __ \
 #   / /_/ / / /_/ / / / /
-#  / .___/_/\__,_/_/ /_/ 
-# /_/                    
-# 
+#  / .___/_/\__,_/_/ /_/
+# /_/
+#
 plan() {
   while getopts :e:l: opt; do
     case "${opt}" in
@@ -121,21 +133,24 @@ plan() {
   done
   shift $((OPTIND-1))
 
+  echo "${env} / ${layer}"
+
   cd layers/${layer}
 
   exec &>/dev/tty
+  init
   terraform plan -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
 }
 
 
 #------------------------------------------------------------------------------
-#                      __     
+#                      __
 #   ____ _____  ____  / /_  __
 #  / __ `/ __ \/ __ \/ / / / /
-# / /_/ / /_/ / /_/ / / /_/ / 
-# \__,_/ .___/ .___/_/\__, /  
-#     /_/   /_/      /____/   
-# 
+# / /_/ / /_/ / /_/ / / /_/ /
+# \__,_/ .___/ .___/_/\__, /
+#     /_/   /_/      /____/
+#
 apply() {
   while getopts :e:l: opt; do
     case "${opt}" in
@@ -148,20 +163,23 @@ apply() {
   done
   shift $((OPTIND-1))
 
+  echo "${env} / ${layer}"
+
   cd layers/${layer}
 
   exec &>/dev/tty
+  init
   terraform apply -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
 }
 
 
 #------------------------------------------------------------------------------
-#                __              __ 
+#                __              __
 #   ____  __  __/ /_____  __  __/ /_
 #  / __ \/ / / / __/ __ \/ / / / __/
-# / /_/ / /_/ / /_/ /_/ / /_/ / /_  
-# \____/\__,_/\__/ .___/\__,_/\__/  
-#               /_/                 
+# / /_/ / /_/ / /_/ /_/ / /_/ / /_
+# \____/\__,_/\__/ .___/\__,_/\__/
+#               /_/
 output() {
   while getopts :e:l: opt; do
     case "${opt}" in
@@ -174,6 +192,8 @@ output() {
   done
   shift $((OPTIND-1))
 
+  echo "${env} / ${layer}"
+
   cd layers/${layer}
 
   exec &>/dev/tty
@@ -182,12 +202,12 @@ output() {
 
 
 #------------------------------------------------------------------------------
-#        __          __                  
+#        __          __
 #   ____/ /__  _____/ /__________  __  __
 #  / __  / _ \/ ___/ __/ ___/ __ \/ / / /
-# / /_/ /  __(__  ) /_/ /  / /_/ / /_/ / 
-# \__,_/\___/____/\__/_/   \____/\__, /  
-#                               /____/   
+# / /_/ /  __(__  ) /_/ /  / /_/ / /_/ /
+# \__,_/\___/____/\__/_/   \____/\__, /
+#                               /____/
 destroy() {
   while getopts :e:l: opt; do
     case "${opt}" in
@@ -205,23 +225,24 @@ destroy() {
   cd layers/${layer}
 
   exec &>/dev/tty
+  init
   terraform destroy -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
 }
 
 
 #------------------------------------------------------------------------------
-#     _       __                       __  _          
-#    (_)___  / /____  _________ ______/ /_(_)   _____ 
+#     _       __                       __  _
+#    (_)___  / /____  _________ ______/ /_(_)   _____
 #   / / __ \/ __/ _ \/ ___/ __ `/ ___/ __/ / | / / _ \
 #  / / / / / /_/  __/ /  / /_/ / /__/ /_/ /| |/ /  __/
-# /_/_/ /_/\__/\___/_/   \__,_/\___/\__/_/ |___/\___/ 
-#                                                     
+# /_/_/ /_/\__/\___/_/   \__,_/\___/\__/_/ |___/\___/
+#
 interactive() {
   exec &>/dev/tty
   local envs=(environments/*/)
   local layers=(layers/*/)
   local commands=(plan apply destroy output)
-  
+
   PS3="Which environment do you want? "
   echo "Available: ${#envs[@]} ";
   select env in "${envs[@]}"; do echo "You selected ${env}"''; break; done
@@ -239,46 +260,57 @@ interactive() {
   if [ "${command}" = "output" ]; then
     terraform output -json
   else
-    terraform init \
-      -backend-config="bucket=${STATE_BUCKET}" \
-      -backend-config="key=${AVENGERS_PROJECT}/${layer}_terraform.tfstate" \
-      -backend-config="region=${AWS_REGION}"
-
+    init
     terraform ${command} -var-file="../../${env}main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
   fi
 }
 
 #------------------------------------------------------------------------------
-#     __                __       __                 
-#    / /_  ____  ____  / /______/ /__________ _____ 
-#   / __ \/ __ \/ __ \/ __/ ___/ __/ ___/ __ `/ __ \
-#  / /_/ / /_/ / /_/ / /_(__  ) /_/ /  / /_/ / /_/ /
-# /_.___/\____/\____/\__/____/\__/_/   \__,_/ .___/ 
-#                                          /_/      
-bootstrap() {
-  ansible-playbook -i 999_hosts.ini 000_bootstrap.yml
+#    (_)___  (_) /_
+#   / / __ \/ / __/
+#  / / / / / / /_
+# /_/_/ /_/_/\__/
+#------------------------------------------------------------------------------
+init() {
+  terraform init \
+    -backend-config="bucket=${STATE_BUCKET}" \
+    -backend-config="key=${PLATFORM_PROJECT}/${layer}_terraform.tfstate" \
+    -backend-config="region=${AWS_REGION}" \
+    -backend-config="dynamodb_table=${DYNAMO_BACKEND_TABLE}"
 }
 
 
 #------------------------------------------------------------------------------
-#    __                      __                  
-#   / /____  ____ __________/ /___ _      ______ 
+#     __                __       __
+#    / /_  ____  ____  / /______/ /__________ _____
+#   / __ \/ __ \/ __ \/ __/ ___/ __/ ___/ __ `/ __ \
+#  / /_/ / /_/ / /_/ / /_(__  ) /_/ /  / /_/ / /_/ /
+# /_.___/\____/\____/\__/____/\__/_/   \__,_/ .___/
+#                                          /_/
+bootstrap() {
+  ansible-playbook -vvv -i 999_hosts.ini 000_bootstrap.yml
+}
+
+
+#------------------------------------------------------------------------------
+#    __                      __
+#   / /____  ____ __________/ /___ _      ______
 #  / __/ _ \/ __ `/ ___/ __  / __ \ | /| / / __ \
 # / /_/  __/ /_/ / /  / /_/ / /_/ / |/ |/ / / / /
-# \__/\___/\__,_/_/   \__,_/\____/|__/|__/_/ /_/ 
-#                                                
+# \__/\___/\__,_/_/   \__,_/\____/|__/|__/_/ /_/
+#
 teardown() {
   ansible-playbook -i 999_hosts.ini 001_teardown.yml
 }
 
 
 #------------------------------------------------------------------------------
-#                      _     
-#     ____ ___  ____ _(_)___ 
+#                      _
+#     ____ ___  ____ _(_)___
 #    / __ `__ \/ __ `/ / __ \
 #   / / / / / / /_/ / / / / /
-#  /_/ /_/ /_/\__,_/_/_/ /_/ 
-#                            
+#  /_/ /_/ /_/\__,_/_/_/ /_/
+#
 [[ -z $1 ]] && interactive
 
 case "${1}" in

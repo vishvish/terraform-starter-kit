@@ -24,6 +24,7 @@ This will remove the cleanup the state bucket in S3.
 
     Python 2.7
     Ansible
+    AWS Cli
     Boto
     Terraform
     Bash
@@ -34,7 +35,7 @@ Copy `envrc.template` to `.envrc` and fill in the appropriate details.
 
 ### Add your own environment
 
-Copy `./environments/999_example` to your own directory.
+Copy `./environments/999_example` to a new directory under ./environments.
 
 ## Prepare the system
 

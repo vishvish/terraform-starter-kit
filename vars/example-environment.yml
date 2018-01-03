@@ -1,4 +1,5 @@
 ---
+# Ansible variables for bootstrap and teardown of the S3 bucket
 # set these parameters to control the region, keypair, and AMI that are launched
 ec2_region: us-east-1
 instances_keypair: keypair-name
@@ -13,4 +14,3 @@ security_groups:
         from_port: 22
         to_port: 22
         cidr_ip: 0.0.0.0/0
-
