@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "infrastructure" {
-  bucket        = "${var.state_bucket}"
+  bucket        = "${var.state_bucket}_${data.terraform_remote_state.vpc.vpc_id}"
   force_destroy = true
 
   tags = "${merge(

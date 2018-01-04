@@ -237,6 +237,8 @@ destroy() {
 #  / / / / / /_/  __/ /  / /_/ / /__/ /_/ /| |/ /  __/
 # /_/_/ /_/\__/\___/_/   \__,_/\___/\__/_/ |___/\___/
 #
+# TODO - use the same format for env and layer, without the directory name, or
+# there will be too many diferences between the interactive and batch commands.
 interactive() {
   exec &>/dev/tty
   local envs=(environments/*/)
@@ -256,6 +258,8 @@ interactive() {
   select command in "${commands[@]}"; do echo "You selected ${command}"''; break; done
 
   cd ${layer}
+  # TODO make $env and $layer = basename($env) , $layer and for consistency and
+  # simplicity in the TF code and so that init works properly
 
   if [ "${command}" = "output" ]; then
     terraform output -json
@@ -274,7 +278,7 @@ interactive() {
 init() {
   terraform init \
     -backend-config="bucket=${STATE_BUCKET}" \
-    -backend-config="key=${PLATFORM_PROJECT}/${layer}_terraform.tfstate" \
+    -backend-config="key=${PLATFORM_PROJECT}/${env}/${layer}.tfstate" \
     -backend-config="region=${AWS_REGION}" \
     -backend-config="dynamodb_table=${DYNAMO_BACKEND_TABLE}"
 }

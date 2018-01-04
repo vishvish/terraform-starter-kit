@@ -1,7 +1,7 @@
 # AMI - Ubuntu Trusty
 base_ami = "ami-0ac8fd79"
 
-region = "eu-west-1"
+region = "eu-east-1"
 
 tags = {
   project           = "platform"
