@@ -139,7 +139,7 @@ plan() {
 
   exec &>/dev/tty
   init
-  terraform plan -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
+  terraform plan -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "state_region=${AWS_REGION}"
 }
 
 
@@ -169,7 +169,7 @@ apply() {
 
   exec &>/dev/tty
   init
-  terraform apply -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
+  terraform apply -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "state_region=${AWS_REGION}"
 }
 
 
@@ -226,7 +226,7 @@ destroy() {
 
   exec &>/dev/tty
   init
-  terraform destroy -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
+  terraform destroy -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "state_region=${AWS_REGION}"
 }
 
 
@@ -265,7 +265,7 @@ interactive() {
     terraform output -json
   else
     init
-    terraform ${command} -var-file="../../${env}main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
+    terraform ${command} -var-file="../../${env}main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "state_region=${AWS_REGION}"
   fi
 }
 
