@@ -19,3 +19,7 @@
       state: absent
       force: yes
 
+  - name: Delete DynamoDB Lock Table
+    dynamodb_table:
+      name: "{{ lookup('env', 'DYNAMO_BACKEND_TABLE') }}"
+      state: absent
