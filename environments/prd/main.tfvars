@@ -7,9 +7,9 @@ tags = {
   project           = "platform"
   email             = "owner@example.com"
   owner             = "Owner Name"
-  live              = "no"
+  live              = "yes"
   technical-contact = "owner@example.com"
-  environment       = "dev"
+  environment       = "prd"
 }
 
 # NETWORK RANGES

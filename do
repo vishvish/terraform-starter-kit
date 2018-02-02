@@ -139,7 +139,7 @@ plan() {
 
   exec &>/dev/tty
   init
-  terraform plan -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
+  terraform plan -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "state_region=${AWS_REGION}"
 }
 
 
@@ -169,7 +169,7 @@ apply() {
 
   exec &>/dev/tty
   init
-  terraform apply -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
+  terraform apply -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "state_region=${AWS_REGION}"
 }
 
 
@@ -226,7 +226,7 @@ destroy() {
 
   exec &>/dev/tty
   init
-  terraform destroy -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
+  terraform destroy -var-file="../../environments/${env}/main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "state_region=${AWS_REGION}"
 }
 
 
@@ -237,6 +237,8 @@ destroy() {
 #  / / / / / /_/  __/ /  / /_/ / /__/ /_/ /| |/ /  __/
 # /_/_/ /_/\__/\___/_/   \__,_/\___/\__/_/ |___/\___/
 #
+# TODO - use the same format for env and layer, without the directory name, or
+# there will be too many diferences between the interactive and batch commands.
 interactive() {
   exec &>/dev/tty
   local envs=(environments/*/)
@@ -256,12 +258,14 @@ interactive() {
   select command in "${commands[@]}"; do echo "You selected ${command}"''; break; done
 
   cd ${layer}
+  # TODO make $env and $layer = basename($env) , $layer and for consistency and
+  # simplicity in the TF code and so that init works properly
 
   if [ "${command}" = "output" ]; then
     terraform output -json
   else
     init
-    terraform ${command} -var-file="../../${env}main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "region=${AWS_REGION}"
+    terraform ${command} -var-file="../../${env}main.tfvars" -var "layer=${layer}" -var "state_bucket=${STATE_BUCKET}" -var "state_region=${AWS_REGION}"
   fi
 }
 
@@ -274,7 +278,7 @@ interactive() {
 init() {
   terraform init \
     -backend-config="bucket=${STATE_BUCKET}" \
-    -backend-config="key=${PLATFORM_PROJECT}/${layer}_terraform.tfstate" \
+    -backend-config="key=${PLATFORM_PROJECT}/${env}/${layer}.tfstate" \
     -backend-config="region=${AWS_REGION}" \
     -backend-config="dynamodb_table=${DYNAMO_BACKEND_TABLE}"
 }

@@ -39,9 +39,3 @@ resource "aws_nat_gateway" "nat_gateway" {
   subnet_id     = "${aws_subnet.private_vpc_aspect_a.id}"
   depends_on    = ["aws_internet_gateway.internet_gateway"]
 }
-
-resource "aws_route" "internet_access" {
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = "${aws_nat_gateway.nat_gateway.id}"
-  route_table_id         = "${aws_route_table.private_route_table.id}"
-}
