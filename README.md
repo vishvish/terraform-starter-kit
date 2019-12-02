@@ -26,7 +26,7 @@ This will remove the cleanup the state bucket in S3.
 
 #### Dependencies
 
-    Python 2.7
+    Python
     Ansible
     AWS Cli
     Boto
@@ -47,6 +47,10 @@ Create the S3 bucket required for Terraform state management:
 
     ./do bootstrap
 
+Or:
+
+    ansible-playbook 000_bootstrap.yml
+
 ### Run interactively
 
     ./do
@@ -56,6 +60,10 @@ And follow the prompts.
 ## When finished, cleanup
 
     ./do teardown
+
+Or:
+
+    ansible-playbook 001_teardown.yml
 
 This removes both the infra and then finally the S3 bucket for state management.
 

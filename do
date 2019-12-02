@@ -7,11 +7,12 @@
 #   / /_/ / /_/ /
 #   \__,_/\____/
 #
-# Author   Vish Vishvanath<vishal.vishvanath@capgemini.com>
-# Date:    21 Nov 2017
-# Version: 3.0
+# Author   Vish Vishvanath<vishvish@users.noreply.github.com>
+# Author   Stephen Connolly
+# Date:    02 December 2019
+# Version: 4.0
 # Description: Comprehensive shell script providing helper functions, tools and
-# syslog integration. For building AWS infrastructure.
+# syslog integration. For building AWS infrastructure with Terraform 12.
 # For both local use and server use.
 
 ## Running an old version of Bash? Get outta here.
