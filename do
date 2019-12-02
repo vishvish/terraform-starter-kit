@@ -292,7 +292,7 @@ init() {
 # /_.___/\____/\____/\__/____/\__/_/   \__,_/ .___/
 #                                          /_/
 bootstrap() {
-  ansible-playbook -vvv -i 999_hosts.ini 000_bootstrap.yml
+  ansible-playbook 000_bootstrap.yml
 }
 
 
@@ -304,7 +304,7 @@ bootstrap() {
 # \__/\___/\__,_/_/   \__,_/\____/|__/|__/_/ /_/
 #
 teardown() {
-  ansible-playbook -i 999_hosts.ini 001_teardown.yml
+  ansible-playbook 001_teardown.yml
 }
 
 
