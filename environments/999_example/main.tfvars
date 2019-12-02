@@ -1,15 +1,16 @@
 # AMI - Ubuntu Trusty
-base_ami = "ami-0ac8fd79"
+# base_ami = "ami-0ac8fd79"
 
-region = "us-east-1"
+region = "eu-west-2"
 
 tags = {
-  project           = "platform"
-  email             = "owner@example.com"
-  owner             = "Owner Name"
-  live              = "no"
-  technical-contact = "owner@example.com"
-  environment       = "dev"
+  namespace    = "tsk"
+  stage        = "dev"
+  name         = "terraform-starter-kit"
+  attributes   = "public"
+  businessunit = "github"
+  owner        = "Owner Person"
+  email        = "owner@example.com"
 }
 
 # NETWORK RANGES

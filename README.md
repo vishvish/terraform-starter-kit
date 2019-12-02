@@ -4,6 +4,10 @@ The code here bootstraps an infrastructure from a single entrypoint, the `./do` 
 
 For Terraform, the `./do` script runs both headlessly and interactively. Interactively, the script will offer options based on the available environments, available layers, and the three Terraform commands, plan, apply and destroy.
 
+Updated the tags system to use Cloudposse's slick Terraform module here: https://github.com/cloudposse/terraform-null-label
+
+
+
 #### Example
 
 To build a bare bones infra consisting on a single VPC with a single private subnet, do the following once the dependencies are installed and the environment variables are present.
